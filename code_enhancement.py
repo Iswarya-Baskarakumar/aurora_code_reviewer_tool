@@ -8,8 +8,8 @@ genai.configure(api_key=GEMINI_API_KEY)
 # Function to analyze code using Gemini API
 def analyze_code(code):
     try:
-        model = genai.GenerativeModel("gemini-1.5-pro-latest")  # Use the correct model
-        prompt = f"Review the following Python code for best practices, optimizations, and potential bugs:\n\n```python\n{code}\n```"
+        model = genai.GenerativeModel("gemini-1.5-pro-latest")
+        prompt = f"Review the following code for best practices, optimizations, and potential bugs:\n\n```\n{code}\n```"
         response = model.generate_content(prompt)
         return response.text
     except Exception as e:
@@ -20,12 +20,16 @@ st.title("AURORA Code Review Tool")
 st.write("Analyze your code for best practices and optimization.")
 
 # Upload or paste code
-uploaded_file = st.file_uploader("Upload file", type=["py"])
+uploaded_file = st.file_uploader("Upload a file (any format)", type=None)
 code_input = st.text_area("Or paste your code here:")
 
 if st.button("Analyze Code"):
     if uploaded_file is not None:
-        code = uploaded_file.read().decode("utf-8")
+        try:
+            code = uploaded_file.read().decode("utf-8")
+        except UnicodeDecodeError:
+            st.error("Unable to read file. Please upload a text-based file.")
+            st.stop()
     elif code_input.strip():
         code = code_input
     else:
